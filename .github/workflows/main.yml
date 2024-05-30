@@ -1,0 +1,108 @@
+name: merge-code-coverage
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+
+  unit-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+      - run: npm i
+      - run: npm run test:unit
+        env:
+          FORCE_COLOR: true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unit-test
+          path: coverage-reports/unit
+          retention-days: 1
+
+  e2e-test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shardIndex: [1, 2]
+        shardTotal: [2]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          
+      - run: npm i
+      - run: npx playwright install --with-deps
+      - run: npx playwright test --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+        env:
+          FORCE_COLOR: true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-test-shard-${{ matrix.shardIndex }}
+          path: coverage-reports/e2e
+          retention-days: 1
+
+
+  merge-coverage:
+    name: merge-coverage
+    runs-on: ubuntu-latest
+    needs: [unit-test, e2e-test]
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download unit coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: unit-test
+          path: coverage-reports/unit
+
+      - name: Download e2e coverage
+        uses: actions/download-artifact@v4
+        with:
+          pattern: e2e-test-shard-*
+          path: coverage-reports/e2e
+          merge-multiple: true
+      
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+      - run: npm i
+      - run: npm run test:merge
+        env:
+          FORCE_COLOR: true
+          
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './coverage-reports'
+          
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
