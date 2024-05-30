@@ -11,6 +11,6 @@ Example for merging code coverage
 
 
 ## Preview V8 Coverage Reports
-- unit: https://cenfun.github.io/merge-code-coverage/unit/
-- e2e (merge-multiple): https://cenfun.github.io/merge-code-coverage/e2e/
-- merged: https://cenfun.github.io/merge-code-coverage/merged/
+- unit: https://cenfun.github.io/merge-code-coverage-vitest/unit/
+- e2e (merge-multiple): https://cenfun.github.io/merge-code-coverage-vitest/e2e/
+- merged: https://cenfun.github.io/merge-code-coverage-vitest/merged/
