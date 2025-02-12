@@ -32,7 +32,7 @@ const coverageOptions = {
 
         // add src dir
         if (!filePath.includes('/') && info.distFile) {
-            const dir = path.dirname(info.distFile).replace('localhost-5173/', '');
+            const dir = path.dirname(info.distFile).replace('localhost:5173/', '');
             return `${dir}/${filePath}`;
         }
 

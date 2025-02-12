@@ -1,3 +1,5 @@
+import { Child } from './child';
+
 /**
  *
  * @param {*} a
@@ -39,5 +41,6 @@ export {
     sum,
     foo,
     bar,
-    uncovered
+    uncovered,
+    Child
 };
